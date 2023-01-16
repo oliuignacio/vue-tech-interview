@@ -180,7 +180,7 @@ function orderByAge() {
                                 <!-- Botón para mostrar el formulario de actualizar -->
                                 <button @click="update(index)" class="btn btn-warning mr-2 mb-2">UPDATE</button>
                                 <!-- Botón para borrar -->
-                                <button @click="erase(index)" class="btn btn-danger">ERASE</button>
+                                <button @click="erase(index)" class="btn btn-danger mb-2">ERASE</button>
                             </span>
                         </td>
                     </tr>
