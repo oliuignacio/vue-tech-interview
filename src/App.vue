@@ -1,85 +1,199 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from "vue";
+
+const customerName = ref("");
+const age = ref("");
+const formUpdate = ref(false);
+const updateId = ref(-1);
+const updateName = ref("");
+const updateAge = ref("");
+const customers = ref ([]);
+const orderList = ref(true);
+
+function sanitize (input) {
+
+  if ((input.name).length > 50 || Number(input.age) > 130) {
+    alert("You can't add such a long value!");
+    return false;
+  }
+
+  return true;
+
+}
+
+
+function createCustomer() {
+
+  const input = {
+    name: customerName.value,
+    age: age.value,
+  }
+
+  if (sanitize(input)) {
+  
+    const formInput = {
+      name: customerName.value,
+      age: age.value,
+      id: customers.value.length,
+    };
+  
+    (customers.value as any).push(formInput);
+  
+    
+  
+    console.log("Form submitted!", customers.value[0].id, customers.value[0].name, customers.value[0].age);
+    customerName.value="";
+    age.value="";
+    return;
+  
+  } 
+
+};
+
+function update(index) {
+  console.log("updating!", index);
+  updateId.value=index //customers.value[index].id;
+  formUpdate.value=true;
+
+};
+
+function save(index) {
+
+  const input = {
+    name: updateName.value,
+    age: updateAge.value,
+  };
+
+  if (sanitize(input)) {
+    console.log("saving!", index);
+    const updatedCustomer = customers.value[index];//customers.value.filter((customer) => customer.id === updateId.value);
+
+    updatedCustomer.name = input.name;
+    updatedCustomer.age = input.age;
+
+    customers.value.splice(index, 1, updatedCustomer);
+
+    updateAge.value = "";
+    updateName.value = "";
+
+    formUpdate.value = false;
+    updateId.value = -1;
+    return;
+
+  }
+
+};
+
+function erase(index) {
+  console.log("erasing!", index);
+  customers.value.splice(index, 1);
+  return;
+  
+};
+
+function orderByAge() {
+  console.log("Ordering List!", orderList.value);
+  
+  let sortedListCustomers =[];
+
+  if (orderList.value) {
+    sortedListCustomers = customers.value.sort((a, b) => a.age - b.age);
+  } else {
+    sortedListCustomers = customers.value.sort((a, b) => a.id - b.id);
+  }
+  
+  
+  customers.value = sortedListCustomers;
+  orderList.value = !orderList.value;
+  return;
+
+};
+
+
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <body >
+    <div class="container">
+      
+      
+      <section class="form">
+        <form action="#" @submit.prevent="createCustomer" class="text-center">
+          <input class="form-control mb-1" v-model="customerName" type="text" required name="customerName" id="customerName" />
+          <input class="form-control mb-1" v-model="age" type="number" required name="age" id="age" />
+          <input @click="createCustomer" type="submit" value="Add Customer" class="btn btn-success  mr-1">
+          <input @click="orderByAge(orderList)" type="button" value="orderByAge" class="btn btn-success">
+        </form>
+        
+      </section>
+      <section class="data">
+       
+        <caption>Customer</caption>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">NAME</th>
+                        <th scope="col">AGE</th>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(customer, index) in customers" >
+                        <td><p v-if="customer.id" >{{ customer.id }}</p>
+                            <p v-if="customer.id==0" >0</p>
+                        </td>
+                        <td>
+                            <span v-if="formUpdate && updateId == index">
+                                <!-- Formulario para actualizar -->
+                                <input v-model="updateName" type="text" class="form-control">
+                            </span>
+                            <span v-else>
+                                <p v-if="customer.name" v-bind:class="{color_red : customer.name.charAt(0) == 'M', color_blue : customer.name.charAt(0) == 'K'}">{{ customer.name }}</p>
+                            </span>
+                        </td>
+                        <td>
+                            <span v-if="formUpdate && updateId == index">
+                                <!-- Formulario para actualizar -->
+                                <input v-model="updateAge" type="text" class="form-control">
+                            </span>
+                            <span v-else>
+                                <!-- Dato edad -->
+                                {{ customer.age }}
+                            </span>
+                        </td>
+                        <td>
+                            <!-- Botón para guardar la información actualizada -->
+                            <span v-if="formUpdate && updateId == index">
+                                <button @click="save(index)" class="btn btn-success">SAVE</button>
+                            </span>
+                            <span v-else>
+                                <!-- Botón para mostrar el formulario de actualizar -->
+                                <button @click="update(index)" class="btn btn-warning">UPDATE</button>
+                                <!-- Botón para borrar -->
+                                <button @click="erase(index)" class="btn btn-danger">ERASE</button>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        
+      </section>
+      
     </div>
-  </header>
+  </body>
 
-  <RouterView />
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+
+.color_red {
+  color: red;
+}
+.color_blue {
+  color: blue;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
 </style>
