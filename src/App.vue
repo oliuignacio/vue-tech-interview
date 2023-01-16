@@ -9,11 +9,16 @@ const updateName = ref("");
 const updateAge = ref("");
 const customers = ref ([]);
 const orderList = ref(true);
+const id = ref(-1);
 
 function sanitize (input) {
 
   if ((input.name).length > 50 || Number(input.age) > 130) {
     alert("You can't add such a long value!");
+    return false;
+  }
+  if ((input.name).length < 1 || Number(input.age) < 1) {
+    alert("You must enter a name and age should be more than cero!");
     return false;
   }
 
@@ -29,12 +34,14 @@ function createCustomer() {
     age: age.value,
   }
 
+  id.value++;
+
   if (sanitize(input)) {
   
     const formInput = {
       name: customerName.value,
       age: age.value,
-      id: customers.value.length,
+      id: id.value,
     };
   
     (customers.value as any).push(formInput);
@@ -121,7 +128,7 @@ function orderByAge() {
       <section class="form">
         <form action="#" @submit.prevent="createCustomer" class="text-center">
           <input class="form-control mb-1" v-model="customerName" type="text" required name="customerName" id="customerName" />
-          <input class="form-control mb-1" v-model="age" type="number" required name="age" id="age" />
+          <input class="form-control mb-1" v-model="age" type="number" min="1" required name="age" id="age" />
           <input @click="createCustomer" type="submit" value="Add Customer" class="btn btn-success  mr-1">
           <input @click="orderByAge(orderList)" type="button" value="orderByAge" class="btn btn-success">
         </form>
@@ -171,7 +178,7 @@ function orderByAge() {
                             </span>
                             <span v-else>
                                 <!-- Botón para mostrar el formulario de actualizar -->
-                                <button @click="update(index)" class="btn btn-warning">UPDATE</button>
+                                <button @click="update(index)" class="btn btn-warning mr-2 mb-2">UPDATE</button>
                                 <!-- Botón para borrar -->
                                 <button @click="erase(index)" class="btn btn-danger">ERASE</button>
                             </span>
